@@ -1,3 +1,6 @@
+.idea
 build
 dist
+targets/i686/iso/boot/kernel.bin
 targets/x86_64/iso/boot/kernel.bin
+gcc-cross-compiler/generated-docs

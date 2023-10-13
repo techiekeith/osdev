@@ -3,12 +3,14 @@
 
 FROM debian:latest AS build
 
+ARG TARGET
+
 ENV BINUTILS_VERSION=2.41
 ENV GDB_VERSION=13.2
 ENV GCC_VERSION=13.2.0
-ENV TARGET=x86_64-elf
 ENV PREFIX=/usr/local
 ENV SRC_DIR=/usr/local/src
+ENV JOBS=8
 ENV BUILD_DEPS='build-essential bison flex libgmp3-dev libmpc-dev libmpfr-dev texinfo wget'
 
 RUN apt-get update
@@ -25,7 +27,7 @@ RUN mkdir build-binutils
 
 WORKDIR ${SRC_DIR}/build-binutils
 RUN ../binutils-${BINUTILS_VERSION}/configure --target=${TARGET} --prefix=${PREFIX} --with-sysroot --disable-nls --disable-werror
-RUN make
+RUN make -j ${JOBS}
 RUN make install
 
 WORKDIR ${SRC_DIR}
@@ -36,7 +38,7 @@ RUN mkdir build-gdb
 
 WORKDIR ${SRC_DIR}/build-gdb
 RUN ../gdb-${GDB_VERSION}/configure --target=${TARGET} --prefix=${PREFIX} --disable-werror
-RUN make all-gdb
+RUN make -j ${JOBS} all-gdb
 RUN make install-gdb
 
 WORKDIR ${SRC_DIR}
@@ -47,8 +49,8 @@ RUN mkdir build-gcc
 
 WORKDIR ${SRC_DIR}/build-gcc
 RUN ../gcc-${GCC_VERSION}/configure --target=${TARGET} --prefix=${PREFIX} --disable-nls --enable-languages=c,c++ --without-headers
-RUN make all-gcc
-RUN make all-target-libgcc
+RUN make -j ${JOBS} all-gcc
+RUN make -j ${JOBS} all-target-libgcc
 RUN make install-gcc
 RUN make install-target-libgcc
 
